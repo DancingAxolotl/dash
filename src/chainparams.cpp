@@ -76,10 +76,10 @@ static CBlock CreateDevNetGenesisBlock(const uint256 &prevBlockHash, const std::
  *     CTxOut(nValue=50.00000000, scriptPubKey=0xA9037BAC7050C479B121CF)
  *   vMerkleTree: e0028e
  */
-static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward)
+static CBlock CreateGenesisBlock(uint32_t nTime, uint32_t nNonce, uint32_t nBits, int32_t nVersion, const CAmount& genesisReward, const char rewardPubkey[131])
 {
     const char* pszTimestamp = "Wired 09/Jan/2014 The Grand Experiment Goes Live: Overstock.com Is Now Accepting Bitcoins";
-    const CScript genesisOutputScript = CScript() << ParseHex("040184710fa689ad5023690c80f3a49c8f13f8d45b8c857fbcbc8bc4a8e4d3eb4b10f4d4604fa08dce601aaf0f470216fe1b51850b4acf21b179c45070ac7b03a9") << OP_CHECKSIG;
+    const CScript genesisOutputScript = CScript() << ParseHex(rewardPubkey) << OP_CHECKSIG;
     return CreateGenesisBlock(pszTimestamp, genesisOutputScript, nTime, nNonce, nBits, nVersion, genesisReward);
 }
 
@@ -271,10 +271,14 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_DIP0008].nThreshold = 3226; // 80% of 4032
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x00000000000000000000000000000000000000000000146103ebd818111fae85"); // 1067570
+        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000000000000");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x000000000000001e09926bcf5fa4513d23e870a34f74e38200db99eb3f5b7a70"); // 1067570
+        consensus.defaultAssumeValid = uint256S("0x000000000000000000000000000000000000000000000000000000000000000");
+
+        static const char ALERT_PUBKEY   [131] = "048240a8748a80a286b270ba126705ced4f2ce5a7847b3610ea3c06513150dade2a8512ed5ea86320824683fc0818f0ac019214973e677acd1244f6d0571fc5103";
+        static const char PREMINE_PUBKEY [131] = "045fd2b9ac7047bab999c0e8022008f44d935972891431ee2cfe33db3bbfd2bdfa3d9adc1c395b27d31c9703162cbb2a4902fa861b0af30d544e1727989e5544c2";
+        static const char SPORK_ADDRESS  [35]  = "M8JivmEURerzB4raBBAxzKMcU9T889Dddf";
 
         /**
          * The message start string is designed to be unlikely to occur in normal data.
@@ -285,16 +289,14 @@ public:
         pchMessageStart[1] = 0x42;
         pchMessageStart[2] = 0x4D;
         pchMessageStart[3] = 0x43;
-        vAlertPubKey = ParseHex("048240a8748a80a286b270ba126705ced4f2ce5a7847b3610ea3c06513150dade2a8512ed5ea86320824683fc0818f0ac019214973e677acd1244f6d0571fc5103");
+        vAlertPubKey = ParseHex(ALERT_PUBKEY);
         nDefaultPort = 9999;
         nPruneAfterHeight = 100000;
 
-        genesis = CreateGenesisBlock(1390095618, 28917698, 0x1e0ffff0, 1, 1000000000 * COIN);
+        genesis = CreateGenesisBlock(1564672910, 28917698, 0x1e0ffff0, 1, 1000000000 * COIN, PREMINE_PUBKEY);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00000ffd590b1485b3caadc19b22e6379c733355108f107a430458cdf3407ab6"));
-        assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
-
-        // TODO: Add dns seeds.
+        //assert(consensus.hashGenesisBlock == uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e"));
+        //assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
 
         // MBM addresses start with 'M'
         base58Prefixes[PUBKEY_ADDRESS] = std::vector<unsigned char>(1,50);
@@ -307,10 +309,12 @@ public:
         // MBM BIP32 prvkeys start with 'xprv' (Bitcoin defaults)
         base58Prefixes[EXT_SECRET_KEY] = boost::assign::list_of(0x04)(0x88)(0xAD)(0xE4).convert_to_container<std::vector<unsigned char> >();
 
-        // MBM BIP44 coin type is '5'
+        // TODO: Multi Bit Master set correct BIP44 coin type
         nExtCoinType = 5;
 
-        vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_main, pnSeed6_main + ARRAYLEN(pnSeed6_main));
+        // TODO: Add dns seeds.
+        vFixedSeeds.clear(); 
+        vSeeds.clear();// For now there are no active nodes in the network. Nodes have to be added manually.
 
         // long living quorum params
         consensus.llmqs[Consensus::LLMQ_50_60] = llmq50_60;
@@ -331,7 +335,7 @@ public:
         nPoolMaxParticipants = 5;
         nFulfilledRequestExpireTime = 60*60; // fulfilled requests expire in 1 hour
 
-        vSporkAddresses = {"M8JivmEURerzB4raBBAxzKMcU9T889Dddf"};
+        vSporkAddresses = {SPORK_ADDRESS};
         nMinSporkKeys = 1;
         fBIP9CheckMasternodesUpgraded = false;
     }
@@ -419,27 +423,29 @@ public:
         consensus.vDeployments[Consensus::DEPLOYMENT_DIP0008].nThreshold = 50; // 50% of 100
 
         // The best chain should have at least this much work.
-        consensus.nMinimumChainWork = uint256S("0x0000000000000000000000000000000000000000000000000062cd3e94ad2d62"); // 95930
+        consensus.nMinimumChainWork = uint256S("0x000000000000000000000000000000000000000000000000000000000000000");
 
         // By default assume that the signatures in ancestors of this block are valid.
-        consensus.defaultAssumeValid = uint256S("0x0000000005ae4db9746d6cad8e0ccebdef1e05afec9c40809f31457fdaf7d843"); // 95930
+        consensus.defaultAssumeValid = uint256S("0x000000000000000000000000000000000000000000000000000000000000000");
+
+        static const char ALERT_PUBKEY   [131] = "048240a8748a80a286b270ba126705ced4f2ce5a7847b3610ea3c06513150dade2a8512ed5ea86320824683fc0818f0ac019214973e677acd1244f6d0571fc5103";
+        static const char PREMINE_PUBKEY [131] = "040fe511593637f67acc52c9b21ed231cca444d29f527b8807d84979a073412cd018c923ac1cf9c3a1a2571228cde78a579722d8ebc32a89dde8a7d4471a3764c4";
+        static const char SPORK_ADDRESS  [35]  = "mZ73ETkkGKfUFPGu3rphuHN2p5oZscPrfi";
 
         pchMessageStart[0] = 0x4D;
         pchMessageStart[1] = 0x42;
         pchMessageStart[2] = 0xca;
         pchMessageStart[3] = 0xff;
-        vAlertPubKey = ParseHex("04517d8a699cb43d3938d7b24faaff7cda448ca4ea267723ba614784de661949bf632d6304316b244646dea079735b9a6fc4af804efb4752075b9fe2245e14e412");
+        vAlertPubKey = ParseHex(ALERT_PUBKEY);
         nDefaultPort = 19999;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1390666206UL, 3861367235UL, 0x1e0ffff0, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1564672910, 3861367235UL, 0x1e0ffff0, 1, 1000000000 * COIN, PREMINE_PUBKEY);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x00000bafbc94add76cb75e2ec92894837288a481e5c005f6563d91623bf8bc2c"));
-        assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
+        //assert(consensus.hashGenesisBlock == uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e"));
+        //assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
 
-        vFixedSeeds.clear();
-        vFixedSeeds = std::vector<SeedSpec6>(pnSeed6_test, pnSeed6_test + ARRAYLEN(pnSeed6_test));
-
+        vFixedSeeds.clear(); // For now there are no nodes in the network. Nodes should be added manually.
         vSeeds.clear();
         // TODO: Add dns seeds.
 
@@ -476,7 +482,7 @@ public:
         nPoolMaxParticipants = 5;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
-        vSporkAddresses = {"mZ73ETkkGKfUFPGu3rphuHN2p5oZscPrfi"};
+        vSporkAddresses = {SPORK_ADDRESS};
         nMinSporkKeys = 1;
         fBIP9CheckMasternodesUpgraded = false;
     }
@@ -568,18 +574,22 @@ public:
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x000000000000000000000000000000000000000000000000000000000000000");
 
+        static const char ALERT_PUBKEY   [131] = "048240a8748a80a286b270ba126705ced4f2ce5a7847b3610ea3c06513150dade2a8512ed5ea86320824683fc0818f0ac019214973e677acd1244f6d0571fc5103";
+        static const char PREMINE_PUBKEY [131] = "045e8f2ce0dbe0455e33fa7cc7b1048b6977a0f81828991fc3a088cd4386b25531bcfae0351359b2fbe51aa71c819d0b05ee3c1ac72fdb4bb26b842e6bf6e6449f";
+        static const char SPORK_ADDRESS  [35]  = "mcQxKfi1C7MyVBdWoL9rkCypAkQf2eY9jW";
+
         pchMessageStart[0] = 0x4D;
         pchMessageStart[1] = 0x42;
         pchMessageStart[2] = 0xff;
         pchMessageStart[3] = 0xce;
-        vAlertPubKey = ParseHex("04517d8a699cb43d3938d7b24faaff7cda448ca4ea267723ba614784de661949bf632d6304316b244646dea079735b9a6fc4af804efb4752075b9fe2245e14e412");
+        vAlertPubKey = ParseHex(ALERT_PUBKEY);
         nDefaultPort = 19999;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1417713337, 1096447, 0x207fffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1564672910, 1096447, 0x207fffff, 1, 1000000000 * COIN, PREMINE_PUBKEY);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e"));
-        assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
+        //assert(consensus.hashGenesisBlock == uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e"));
+        //assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
 
         devnetGenesis = FindDevNetGenesisBlock(consensus, genesis, 50 * COIN);
         consensus.hashDevnetGenesisBlock = devnetGenesis.GetHash();
@@ -619,7 +629,7 @@ public:
         nPoolMaxParticipants = 5;
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
-        vSporkAddresses = {"mcQxKfi1C7MyVBdWoL9rkCypAkQf2eY9jW"};
+        vSporkAddresses = {SPORK_ADDRESS};
         nMinSporkKeys = 1;
         // devnets are started with no blocks and no MN, so we can't check for upgraded MN (as there are none)
         fBIP9CheckMasternodesUpgraded = false;
@@ -681,7 +691,7 @@ public:
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // Faster than normal for regtest (144 instead of 2016)
         consensus.nBaseReward = 1750;
-        
+
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nStartTime = 0;
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].nTimeout = 999999999999ULL;
@@ -703,9 +713,11 @@ public:
 
         // The best chain should have at least this much work.
         consensus.nMinimumChainWork = uint256S("0x00");
-
         // By default assume that the signatures in ancestors of this block are valid.
         consensus.defaultAssumeValid = uint256S("0x00");
+
+        static const char PREMINE_PUBKEY [131] = "046393d800c2d40a3cde3552186d21d508e90021cf8ccaee0a2eed6570ef9eba5c221bf08c6a6304dff2e3c86b59ad851402743d8bd9e9edcb113a593bee6c9301";
+        static const char SPORK_ADDRESS  [35]  = "mcQxKfi1C7MyVBdWoL9rkCypAkQf2eY9jW";
 
         pchMessageStart[0] = 0x4D;
         pchMessageStart[1] = 0x42;
@@ -714,10 +726,10 @@ public:
         nDefaultPort = 19994;
         nPruneAfterHeight = 1000;
 
-        genesis = CreateGenesisBlock(1417713337, 1096447, 0x207fffff, 1, 50 * COIN);
+        genesis = CreateGenesisBlock(1564672910, 1096447, 0x207fffff, 1, 1000000000 * COIN, PREMINE_PUBKEY);
         consensus.hashGenesisBlock = genesis.GetHash();
-        assert(consensus.hashGenesisBlock == uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e"));
-        assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
+        //assert(consensus.hashGenesisBlock == uint256S("0x000008ca1832a4baf228eb1553c03d3a2c8e02399550dd6ea8d65cec3ef23d2e"));
+        //assert(genesis.hashMerkleRoot == uint256S("0xe0028eb9648db56b1ac77cf090b99048a8007e2bb64b68f092c03c7f56a662c7"));
 
         vFixedSeeds.clear(); //!< Regtest mode doesn't have any fixed seeds.
         vSeeds.clear();      //!< Regtest mode doesn't have any DNS seeds.
@@ -732,7 +744,7 @@ public:
 
         nFulfilledRequestExpireTime = 5*60; // fulfilled requests expire in 5 minutes
 
-        vSporkAddresses = {"mcQxKfi1C7MyVBdWoL9rkCypAkQf2eY9jW"};
+        vSporkAddresses = {SPORK_ADDRESS};
         nMinSporkKeys = 1;
         // regtest usually has no masternodes in most tests, so don't check for upgraged MNs
         fBIP9CheckMasternodesUpgraded = false;

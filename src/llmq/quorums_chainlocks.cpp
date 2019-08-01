@@ -206,10 +206,13 @@ void CChainLocksHandler::UpdatedBlockTip(const CBlockIndex* pindexNew)
 
 void CChainLocksHandler::CheckActiveState()
 {
-    bool fDIP0008Active;
+    bool fDIP0008Active = false;
     {
         LOCK(cs_main);
-        fDIP0008Active = VersionBitsState(chainActive.Tip()->pprev, Params().GetConsensus(), Consensus::DEPLOYMENT_DIP0008, versionbitscache) == THRESHOLD_ACTIVE;
+        if (chainActive.Tip())
+        {
+            fDIP0008Active = VersionBitsState(chainActive.Tip()->pprev, Params().GetConsensus(), Consensus::DEPLOYMENT_DIP0008, versionbitscache) == THRESHOLD_ACTIVE;
+        }
     }
 
     LOCK(cs);
