@@ -46,15 +46,9 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
-<<<<<<< HEAD
-            case DASH: return QString("MBM");
-            case mDASH: return QString("mMBM");
-            case uDASH: return QString::fromUtf8("μMBM");
-=======
             case MBM: return QString("MBM");
             case mMBM: return QString("mMBM");
             case uMBM: return QString::fromUtf8("μMBM");
->>>>>>> 6da392dc6... Changed coin name in UI
             case duffs: return QString("duffs");
             default: return QString("???");
         }
@@ -63,15 +57,9 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
-<<<<<<< HEAD
-            case DASH: return QString("tMBM");
-            case mDASH: return QString("mtMBM");
-            case uDASH: return QString::fromUtf8("μtMBM");
-=======
             case MBM: return QString("tMBM");
             case mMBM: return QString("mtMBM");
             case uMBM: return QString::fromUtf8("μtMBM");
->>>>>>> 6da392dc6... Changed coin name in UI
             case duffs: return QString("tduffs");
             default: return QString("???");
         }
@@ -84,15 +72,9 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
-<<<<<<< HEAD
-            case DASH: return QString("Multi Bit Master");
-            case mDASH: return QString("Milli-Multi Bit Master (1 / 1" THIN_SP_UTF8 "000)");
-            case uDASH: return QString("Micro-Multi Bit Master (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-=======
             case MBM: return QString("Multi Bit Master");
             case mMBM: return QString("Milli-Multi Bit Master (1 / 1" THIN_SP_UTF8 "000)");
             case uMBM: return QString("Micro-Multi Bit Master (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
->>>>>>> 6da392dc6... Changed coin name in UI
             case duffs: return QString("Ten Nano-Multi Bit Master (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
@@ -101,15 +83,9 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
-<<<<<<< HEAD
-            case DASH: return QString("Test Multi Bit Master");
-            case mDASH: return QString("Milli-Test Multi Bit Master (1 / 1" THIN_SP_UTF8 "000)");
-            case uDASH: return QString("Micro-Test Multi Bit Master (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-=======
             case MBM: return QString("Test Multi Bit Master");
             case mMBM: return QString("Milli-Test Multi Bit Master (1 / 1" THIN_SP_UTF8 "000)");
             case uMBM: return QString("Micro-Test Multi Bit Master (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
->>>>>>> 6da392dc6... Changed coin name in UI
             case duffs: return QString("Ten Nano-Test Multi Bit Master (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
