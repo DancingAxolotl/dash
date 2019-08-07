@@ -20,8 +20,8 @@
 
 #include <boost/test/unit_test.hpp>
 
-static const CBitcoinAddress payoutAddress  ("yRq1Ky1AfFmf597rnotj7QRxsDUKePVWNF");
-static const std::string payoutKey          ("cV3qrPWzDcnhzRMV4MqtTH4LhNPqPo26ZntGvfJhc8nqCi8Ae5xR");
+static const CBitcoinAddress payoutAddress  ("MEzdiztn84qotTVAnUkBMX3v4q6EUwDnKS");
+static const std::string payoutKey          ("XJgHnMnvPLBHig6VY8vkzn6PqJT7W6vJGaLQpmVBwnTbx6hicENL");
 
 typedef std::map<COutPoint, std::pair<int, CAmount>> SimpleUTXOMap;
 

@@ -17,6 +17,7 @@
 #include "uint256.h"
 #include "util.h"
 #include "utilstrencodings.h"
+#include "primitives/transaction.h"
 
 #include "test/test_dash.h"
 
@@ -24,7 +25,11 @@
 
 #include <boost/test/unit_test.hpp>
 
-BOOST_FIXTURE_TEST_SUITE(miner_tests, TestingSetup)
+struct TestnetTestingSetup : public TestingSetup {
+    TestnetTestingSetup() : TestingSetup(CBaseChainParams::TESTNET) {}
+};
+
+BOOST_FIXTURE_TEST_SUITE(miner_tests, TestnetTestingSetup)
 
 static CFeeRate blockMinFeeRate = CFeeRate(DEFAULT_BLOCK_MIN_TX_FEE);
 
@@ -41,38 +46,32 @@ struct {
     unsigned char extranonce;
     unsigned int nonce;
 } blockinfo[] = {
-    {0, 0x0017f257}, {0, 0x000d4581}, {0, 0x0048042c}, {0, 0x0025bff0},
-    {0, 0x2002d3f8}, {0, 0x6001161f}, {0, 0xe000c5e5}, {0, 0x2000cce2},
-    {0, 0x40004753}, {0, 0x80025297}, {0, 0x600009de}, {0, 0x6005780c},
-    {0, 0x40025ae9}, {0, 0xc000341c}, {0, 0xc0053062}, {0, 0x40002f90},
-    {0, 0xc00047ae}, {0, 0xa0015716}, {0, 0x2000d499}, {0, 0x80009b45},
-    {0, 0xc000a7c9}, {0, 0x8001f8ba}, {0, 0xc000d147}, {0, 0x60018ac3},
-    {0, 0xc000a9ac}, {0, 0xa003f6e6}, {0, 0x2007436e}, {0, 0xc0013f28},
-    {0, 0x00010892}, {0, 0xa0000027}, {0, 0x40008de9}, {0, 0x400019f3},
-    {0, 0x00025b86}, {0, 0x80002799}, {0, 0xc001eb0e}, {0, 0xe003e950},
-    {0, 0xe001ff87}, {0, 0x000158b0}, {0, 0x600189da}, {0, 0x0000028c},
-    {0, 0x600014ca}, {0, 0x60000e4d}, {0, 0xc0000820}, {0, 0xa005184e},
-    {0, 0x40012b22}, {0, 0xe0028f6b}, {0, 0xe0027bce}, {0, 0xa0007b51},
-    {0, 0x8002496d}, {0, 0xc001f211}, {0, 0x00032bf0}, {0, 0x4002d767},
-    {0, 0x6008410a}, {0, 0x800361c3}, {0, 0xe000f80d}, {0, 0xe009ac97},
-    {0, 0x80002103}, {0, 0x6001fab4}, {0, 0x4002843b}, {0, 0x6002b67c},
-    {0, 0xa000faf3}, {0, 0x6000949e}, {0, 0x80000f1f}, {0, 0x6000c946},
-    {0, 0xe00314b3}, {0, 0x20012bbf}, {0, 0x00009c7e}, {0, 0x2003e63a},
-    {0, 0x20025157}, {0, 0x80041ff5}, {0, 0x60012a6c}, {0, 0x4000119b},
-    {0, 0xc000a454}, {0, 0x20042c4b}, {0, 0x0003003c}, {0, 0x000558b2},
-    {0, 0x2000198c}, {0, 0x200b0b3e}, {0, 0x4001c1e4}, {0, 0x80000034},
-    {0, 0xe00039d1}, {0, 0xc001ded3}, {0, 0x80006740}, {0, 0xc0014546},
-    {0, 0x00036a1a}, {0, 0xa001ae9c}, {0, 0x6000a148}, {0, 0xe001fd73},
-    {0, 0xa001cebb}, {0, 0xa000d4b8}, {0, 0xe00154b3}, {0, 0x40004bec},
-    {0, 0xc003f230}, {0, 0xe0069a26}, {0, 0xa00072b4}, {0, 0xc002e1b2},
-    {0, 0x20009a02}, {0, 0xc0004a10}, {0, 0xe0045a11}, {0, 0x60034d09},
-    {0, 0x000073ff}, {0, 0x00003f1c}, {0, 0x4002c4fd}, {0, 0x2000bb60},
-    {0, 0x4000b6b6}, {0, 0x6000ea25}, {0, 0x400989d9}, {0, 0xc000877f},
-    {0, 0x6000d17c}, {0, 0xc0009228}, {0, 0x4002827f}, {0, 0x80056a85},
-    {0, 0x40045af7}, {0, 0x6000df7a}, {0, 0xe00131a1}, {0, 0x40021386},
-    {0, 0xa00891b5}, {0, 0x60007854}, {0, 0x60021730}
+    {0, 3113015}, {0, 1478645}, {0, 220976}, {0, 53647},
+    {0, 37438}, {0, 198150}, {0, 265631}, {0, 665437},
+    {0, 487214}, {0, 566668}, {0, 1251390}, {0, 869149},
+    {0, 586950}, {0, 613416}, {0, 574852}, {0, 2131081},
+    {0, 170690}, {0, 131486}, {0, 945521}, {0, 156712},
+    {0, 206393}, {0, 1213868}, {0, 1775777}, {0, 394320},
+    {0, 307180}, {0, 147314}, {0, 298006}, {0, 826319},
+    {0, 844227}, {0, 1258740}, {0, 961643}, {0, 836456},
+    {0, 981673}, {0, 207111}, {0, 3285577}, {0, 290627},
+    {0, 1738441}, {0, 1803414}, {0, 308350}, {0, 529914},
+    {0, 1139987}, {0, 808458}, {0, 51258}, {0, 18081},
+    {0, 573762}, {0, 121594}, {0, 219977}, {0, 165086},
+    {0, 1955973}, {0, 101046}, {0, 213078}, {0, 368692},
+    {0, 39664}, {0, 418533}, {0, 1240932}, {0, 43546},
+    {0, 1757805}, {0, 5196480}, {0, 869104}, {0, 21187},
+    {0, 143248}, {0, 1010207}, {0, 571234}, {0, 135657},
+    {0, 178847}, {0, 2672521}, {0, 2562455}, {0, 528638},
+    {0, 329565}, {0, 6735106}, {0, 96868}, {0, 1392531},
+    {0, 419597}, {0, 298323}, {0, 2128349}, {0, 510573},
+    {0, 1046865}, {0, 395480}, {0, 516678}, {0, 137590},
+    {0, 1443787}, {0, 295227}, {0, 546322}, {0, 41818},
+    {0, 131228}, {0, 983725}, {0, 1261167}, {0, 465381},
+    {0, 115620}, {0, 92259}, {0, 206585}, {0, 212395},
+    {0, 281019}, {0, 977482}, {0, 962756}, {0, 203730},
+    {0, 2051092}, {0, 1656616}, {0, 264930}, {0, 975867}
 };
-
 CBlockIndex CreateBlockIndex(int nHeight)
 {
     CBlockIndex index;
@@ -198,9 +197,9 @@ void TestPackageSelection(const CChainParams& chainparams, CScript scriptPubKey,
 // NOTE: These tests rely on CreateNewBlock doing its own self-validation!
 BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
 {
-    const CChainParams& chainparams = Params(CBaseChainParams::MAIN);
-    CScript scriptPubKey = CScript() << ParseHex("04678afdb0fe5548271967f1a67130b7105cd6a828e03909a67962e0ea1f61deb649f6bc3f4cef38c4f35504e51ec112de5c384df7ba0b8d578a4c702b6bf11d5f") << OP_CHECKSIG;
-    std::unique_ptr<CBlockTemplate> pblocktemplate, pemptyblocktemplate;
+    const CChainParams& chainparams = Params(CBaseChainParams::TESTNET);
+    CScript scriptPubKey = CScript() << ParseHex("045e8f2ce0dbe0455e33fa7cc7b1048b6977a0f81828991fc3a088cd4386b25531bcfae0351359b2fbe51aa71c819d0b05ee3c1ac72fdb4bb26b842e6bf6e6449f") << OP_CHECKSIG;
+    std::unique_ptr<CBlockTemplate> pblocktemplate;
     CMutableTransaction tx,tx2;
     CScript script;
     uint256 hash;
@@ -210,9 +209,6 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
 
     fCheckpointsEnabled = false;
 
-    // Simple block creation, nothing special yet:
-    BOOST_CHECK(pemptyblocktemplate = AssemblerForTest(chainparams).CreateNewBlock(scriptPubKey));
-
     // We can't make transactions until we have inputs
     // Therefore, load 100 blocks :)
     int baseheight = 0;
@@ -220,18 +216,9 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
 
     auto createAndProcessEmptyBlock = [&]() {
         int i = chainActive.Height();
-        CBlock *pblock = &pemptyblocktemplate->block; // pointer for convenience
+        std::unique_ptr<CBlockTemplate> blocktemplate = AssemblerForTest(chainparams).CreateNewBlock(scriptPubKey); // pointer for convenience
+        CBlock *pblock = &blocktemplate->block;
         {
-            LOCK(cs_main);
-            pblock->nVersion = 2;
-            pblock->nTime = chainActive.Tip()->GetMedianTimePast()+1;
-            CMutableTransaction txCoinbase(*pblock->vtx[0]);
-            txCoinbase.nVersion = 1;
-            txCoinbase.vin[0].scriptSig = CScript() << (chainActive.Height() + 1);
-            txCoinbase.vin[0].scriptSig.push_back(blockinfo[i].extranonce);
-            txCoinbase.vin[0].scriptSig.push_back(chainActive.Height());
-            txCoinbase.vout[0].scriptPubKey = CScript();
-            pblock->vtx[0] = MakeTransactionRef(std::move(txCoinbase));
             if (txFirst.size() == 0)
                 baseheight = chainActive.Height();
             if (txFirst.size() < 4)
@@ -244,10 +231,10 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
             while (!CheckProofOfWork(pblock->GetHash(), pblock->nBits, chainparams.GetConsensus())) {
                 pblock->nNonce++;
             }
+            std::cout << "Block found " << i << ": " << pblock->nNonce << "\n";
         }
         std::shared_ptr<const CBlock> shared_pblock = std::make_shared<const CBlock>(*pblock);
         BOOST_CHECK(ProcessNewBlock(chainparams, shared_pblock, true, NULL));
-        pblock->hashPrevBlock = pblock->GetHash();
     };
 
     for (unsigned int i = 0; i < sizeof(blockinfo)/sizeof(*blockinfo) - 1; ++i)
@@ -261,7 +248,7 @@ BOOST_AUTO_TEST_CASE(CreateNewBlock_validity)
     // Just to make sure we can still make simple blocks
     BOOST_CHECK(pblocktemplate = AssemblerForTest(chainparams).CreateNewBlock(scriptPubKey));
 
-    const CAmount BLOCKSUBSIDY = 500*COIN;
+    const CAmount BLOCKSUBSIDY = 1750*COIN;
     const CAmount LOWFEE = CENT;
     const CAmount HIGHFEE = COIN;
     const CAmount HIGHERFEE = 4*COIN;
