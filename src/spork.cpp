@@ -20,11 +20,11 @@ const std::string CSporkManager::SERIALIZATION_VERSION_STRING = "CSporkManager-V
 std::map<int, int64_t> mapSporkDefaults = {
     {SPORK_2_INSTANTSEND_ENABLED,            0},             // ON
     {SPORK_3_INSTANTSEND_BLOCK_FILTERING,    0},             // ON
-    {SPORK_5_INSTANTSEND_MAX_VALUE,          1000},          // 1000 Dash
+    {SPORK_5_INSTANTSEND_MAX_VALUE,          1000},          // 1000 MBM
     {SPORK_6_NEW_SIGS,                       4070908800ULL}, // OFF
     {SPORK_9_SUPERBLOCKS_ENABLED,            4070908800ULL}, // OFF
     {SPORK_12_RECONSIDER_BLOCKS,             0},             // 0 BLOCKS
-    {SPORK_15_DETERMINISTIC_MNS_ENABLED,     4070908800ULL}, // OFF
+    {SPORK_15_DETERMINISTIC_MNS_ENABLED,     0},             // ON
     {SPORK_16_INSTANTSEND_AUTOLOCKS,         4070908800ULL}, // OFF
     {SPORK_17_QUORUM_DKG_ENABLED,            4070908800ULL}, // OFF
     {SPORK_19_CHAINLOCKS_ENABLED,            4070908800ULL}, // OFF

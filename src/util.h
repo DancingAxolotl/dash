@@ -1,6 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
 // Copyright (c) 2014-2019 The Dash Core developers
+// Copyright (c) 2019 The Multi Bit Master Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -256,7 +257,7 @@ void RenameThreadPool(ctpl::thread_pool& tp, const char* baseName);
  */
 template <typename Callable> void TraceThread(const char* name,  Callable func)
 {
-    std::string s = strprintf("dash-%s", name);
+    std::string s = strprintf("mbm-%s", name);
     RenameThread(s.c_str());
     try
     {

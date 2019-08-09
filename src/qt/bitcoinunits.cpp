@@ -19,9 +19,9 @@ BitcoinUnits::BitcoinUnits(QObject *parent):
 QList<BitcoinUnits::Unit> BitcoinUnits::availableUnits()
 {
     QList<BitcoinUnits::Unit> unitlist;
-    unitlist.append(DASH);
-    unitlist.append(mDASH);
-    unitlist.append(uDASH);
+    unitlist.append(MBM);
+    unitlist.append(mMBM);
+    unitlist.append(uMBM);
     unitlist.append(duffs);
     return unitlist;
 }
@@ -30,9 +30,9 @@ bool BitcoinUnits::valid(int unit)
 {
     switch(unit)
     {
-    case DASH:
-    case mDASH:
-    case uDASH:
+    case MBM:
+    case mMBM:
+    case uMBM:
     case duffs:
         return true;
     default:
@@ -46,9 +46,9 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
-            case DASH: return QString("DASH");
-            case mDASH: return QString("mDASH");
-            case uDASH: return QString::fromUtf8("μDASH");
+            case MBM: return QString("MBM");
+            case mMBM: return QString("mMBM");
+            case uMBM: return QString::fromUtf8("μMBM");
             case duffs: return QString("duffs");
             default: return QString("???");
         }
@@ -57,9 +57,9 @@ QString BitcoinUnits::name(int unit)
     {
         switch(unit)
         {
-            case DASH: return QString("tDASH");
-            case mDASH: return QString("mtDASH");
-            case uDASH: return QString::fromUtf8("μtDASH");
+            case MBM: return QString("tMBM");
+            case mMBM: return QString("mtMBM");
+            case uMBM: return QString::fromUtf8("μtMBM");
             case duffs: return QString("tduffs");
             default: return QString("???");
         }
@@ -72,10 +72,10 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
-            case DASH: return QString("Dash");
-            case mDASH: return QString("Milli-Dash (1 / 1" THIN_SP_UTF8 "000)");
-            case uDASH: return QString("Micro-Dash (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-            case duffs: return QString("Ten Nano-Dash (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case MBM: return QString("Multi Bit Master");
+            case mMBM: return QString("Milli-Multi Bit Master (1 / 1" THIN_SP_UTF8 "000)");
+            case uMBM: return QString("Micro-Multi Bit Master (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case duffs: return QString("Ten Nano-Multi Bit Master (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
     }
@@ -83,10 +83,10 @@ QString BitcoinUnits::description(int unit)
     {
         switch(unit)
         {
-            case DASH: return QString("TestDashs");
-            case mDASH: return QString("Milli-TestDash (1 / 1" THIN_SP_UTF8 "000)");
-            case uDASH: return QString("Micro-TestDash (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
-            case duffs: return QString("Ten Nano-TestDash (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case MBM: return QString("Test Multi Bit Master");
+            case mMBM: return QString("Milli-Test Multi Bit Master (1 / 1" THIN_SP_UTF8 "000)");
+            case uMBM: return QString("Micro-Test Multi Bit Master (1 / 1" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
+            case duffs: return QString("Ten Nano-Test Multi Bit Master (1 / 100" THIN_SP_UTF8 "000" THIN_SP_UTF8 "000)");
             default: return QString("???");
         }
     }
@@ -96,9 +96,9 @@ qint64 BitcoinUnits::factor(int unit)
 {
     switch(unit)
     {
-    case DASH:  return 100000000;
-    case mDASH: return 100000;
-    case uDASH: return 100;
+    case MBM:  return 100000000;
+    case mMBM: return 100000;
+    case uMBM: return 100;
     case duffs: return 1;
     default:   return 100000000;
     }
@@ -108,9 +108,9 @@ int BitcoinUnits::decimals(int unit)
 {
     switch(unit)
     {
-    case DASH: return 8;
-    case mDASH: return 5;
-    case uDASH: return 2;
+    case MBM: return 8;
+    case mMBM: return 5;
+    case uMBM: return 2;
     case duffs: return 0;
     default: return 0;
     }

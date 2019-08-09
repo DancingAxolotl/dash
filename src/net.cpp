@@ -1578,7 +1578,7 @@ void ThreadMapPort()
             }
         }
 
-        std::string strDesc = "Dash Core " + FormatFullVersion();
+        std::string strDesc = "Multi Bit Master " + FormatFullVersion();
 
         try {
             while (true) {

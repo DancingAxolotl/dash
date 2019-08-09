@@ -3,32 +3,12 @@
 # Distributed under the MIT software license, see the accompanying
 # file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
-bin_PROGRAMS += qt/dash-qt
+bin_PROGRAMS += qt/mbm-qt
 EXTRA_LIBRARIES += qt/libdashqt.a
 
 # dash qt core #
 QT_TS = \
-  qt/locale/dash_ar.ts \
-  qt/locale/dash_bg.ts \
-  qt/locale/dash_de.ts \
-  qt/locale/dash_en.ts \
-  qt/locale/dash_es.ts \
-  qt/locale/dash_fi.ts \
-  qt/locale/dash_fr.ts \
-  qt/locale/dash_it.ts \
-  qt/locale/dash_ja.ts \
-  qt/locale/dash_ko.ts \
-  qt/locale/dash_nl.ts \
-  qt/locale/dash_pl.ts \
-  qt/locale/dash_pt.ts \
-  qt/locale/dash_ru.ts \
-  qt/locale/dash_sk.ts \
-  qt/locale/dash_sv.ts \
-  qt/locale/dash_th.ts \
-  qt/locale/dash_tr.ts \
-  qt/locale/dash_vi.ts \
-  qt/locale/dash_zh_CN.ts \
-  qt/locale/dash_zh_TW.ts
+  qt/locale/dash_en.ts
 
 QT_FORMS_UI = \
   qt/forms/addressbookpage.ui \
@@ -595,7 +575,7 @@ RES_CSS = \
 
 RES_MOVIES = $(wildcard $(srcdir)/qt/res/movies/spinner-*.png)
 
-BITCOIN_RC = qt/res/dash-qt-res.rc
+BITCOIN_RC = qt/res/mbm-qt-res.rc
 
 BITCOIN_QT_INCLUDES = -I$(builddir)/qt -I$(srcdir)/qt -I$(srcdir)/qt/forms \
   -I$(builddir)/qt/forms -DQT_NO_KEYWORDS
@@ -616,37 +596,37 @@ QT_FORMS_H=$(join $(dir $(QT_FORMS_UI)),$(addprefix ui_, $(notdir $(QT_FORMS_UI:
 # Most files will depend on the forms and moc files as includes. Generate them
 # before anything else.
 $(QT_MOC): $(QT_FORMS_H)
-$(qt_libdashqt_a_OBJECTS) $(qt_dash_qt_OBJECTS) : | $(QT_MOC)
+$(qt_libdashqt_a_OBJECTS) $(qt_mbm_qt_OBJECTS) : | $(QT_MOC)
 
 #Generating these with a half-written protobuf header leads to wacky results.
 #This makes sure it's done.
 $(QT_MOC): $(PROTOBUF_H)
 $(QT_MOC_CPP): $(PROTOBUF_H)
 
-# dash-qt binary #
-qt_dash_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
+# mbm-qt binary #
+qt_mbm_qt_CPPFLAGS = $(AM_CPPFLAGS) $(BITCOIN_INCLUDES) $(BITCOIN_QT_INCLUDES) \
   $(QT_INCLUDES) $(PROTOBUF_CFLAGS) $(QR_CFLAGS)
-qt_dash_qt_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
+qt_mbm_qt_CXXFLAGS = $(AM_CXXFLAGS) $(QT_PIE_FLAGS)
 
-qt_dash_qt_SOURCES = qt/dash.cpp
+qt_mbm_qt_SOURCES = qt/dash.cpp
 if TARGET_DARWIN
-  qt_dash_qt_SOURCES += $(BITCOIN_MM)
+  qt_mbm_qt_SOURCES += $(BITCOIN_MM)
 endif
 if TARGET_WINDOWS
-  qt_dash_qt_SOURCES += $(BITCOIN_RC)
+  qt_mbm_qt_SOURCES += $(BITCOIN_RC)
 endif
-qt_dash_qt_LDADD = qt/libdashqt.a $(LIBBITCOIN_SERVER)
+qt_mbm_qt_LDADD = qt/libdashqt.a $(LIBBITCOIN_SERVER)
 if ENABLE_WALLET
-qt_dash_qt_LDADD += $(LIBBITCOIN_WALLET)
+qt_mbm_qt_LDADD += $(LIBBITCOIN_WALLET)
 endif
 if ENABLE_ZMQ
-qt_dash_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
+qt_mbm_qt_LDADD += $(LIBBITCOIN_ZMQ) $(ZMQ_LIBS)
 endif
-qt_dash_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) \
+qt_mbm_qt_LDADD += $(LIBBITCOIN_CLI) $(LIBBITCOIN_COMMON) $(LIBBITCOIN_UTIL) $(LIBBITCOIN_CONSENSUS) $(LIBBITCOIN_CRYPTO) $(LIBUNIVALUE) $(LIBLEVELDB) $(LIBMEMENV) \
   $(BACKTRACE_LIB) $(BOOST_LIBS) $(QT_LIBS) $(QT_DBUS_LIBS) $(QR_LIBS) $(PROTOBUF_LIBS) $(BDB_LIBS) $(SSL_LIBS) $(CRYPTO_LIBS) $(MINIUPNPC_LIBS) $(LIBSECP256K1) \
   $(EVENT_PTHREADS_LIBS) $(EVENT_LIBS) $(BLS_LIBS)
-qt_dash_qt_LDFLAGS = $(LDFLAGS_WRAP_EXCEPTIONS) $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
-qt_dash_qt_LIBTOOLFLAGS = --tag CXX
+qt_mbm_qt_LDFLAGS = $(LDFLAGS_WRAP_EXCEPTIONS) $(RELDFLAGS) $(AM_LDFLAGS) $(QT_LDFLAGS) $(LIBTOOL_APP_LDFLAGS)
+qt_mbm_qt_LIBTOOLFLAGS = --tag CXX
 
 #locale/foo.ts -> locale/foo.qm
 QT_QM=$(QT_TS:.ts=.qm)
@@ -677,10 +657,10 @@ CLEAN_QT = $(nodist_qt_libdashqt_a_SOURCES) $(QT_QM) $(QT_FORMS_H) qt/*.gcda qt/
 
 CLEANFILES += $(CLEAN_QT)
 
-dash_qt_clean: FORCE
-	rm -f $(CLEAN_QT) $(qt_libdashqt_a_OBJECTS) $(qt_dash_qt_OBJECTS) qt/dash-qt$(EXEEXT) $(LIBBITCOINQT)
+mbm_qt_clean: FORCE
+	rm -f $(CLEAN_QT) $(qt_libdashqt_a_OBJECTS) $(qt_mbm_qt_OBJECTS) qt/mbm-qt$(EXEEXT) $(LIBBITCOINQT)
 
-dash_qt : qt/dash-qt$(EXEEXT)
+mbm_qt : qt/mbm-qt$(EXEEXT)
 
 ui_%.h: %.ui
 	@test -f $(UIC)

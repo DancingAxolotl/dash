@@ -1,6 +1,7 @@
 // Copyright (c) 2009-2010 Satoshi Nakamoto
 // Copyright (c) 2009-2015 The Bitcoin Core developers
 // Copyright (c) 2014-2019 The Dash Core developers
+// Copyright (c) 2019 The Multi Bit Master Core developers
 // Distributed under the MIT software license, see the accompanying
 // file COPYING or http://www.opensource.org/licenses/mit-license.php.
 
@@ -60,7 +61,7 @@
 #include <boost/thread.hpp>
 
 #if defined(NDEBUG)
-# error "Dash Core cannot be compiled without assertions."
+# error "Multi Bit Master Core cannot be compiled without assertions."
 #endif
 
 /**
@@ -726,7 +727,7 @@ bool AcceptToMemoryPoolWorker(CTxMemPool& pool, CValidationState& state, const C
                                         hash.ToString(), ptxConflicting->GetHash().ToString()),
                                 REJECT_INVALID, "txlockreq-tx-mempool-conflict");
             }
-            // Transaction conflicts with mempool and RBF doesn't exist in Dash
+            // Transaction conflicts with mempool and RBF doesn't exist in Multi Bit Master
             return state.Invalid(false, REJECT_CONFLICT, "txn-mempool-conflict");
         }
     }
@@ -1136,42 +1137,12 @@ NOTE:   unlike bitcoin we are using PREVIOUS block height here,
 */
 CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params& consensusParams, bool fSuperblockPartOnly)
 {
-    double dDiff;
-    CAmount nSubsidyBase;
-
-    if (nPrevHeight <= 4500 && Params().NetworkIDString() == CBaseChainParams::MAIN) {
-        /* a bug which caused diff to not be correctly calculated */
-        dDiff = (double)0x0000ffff / (double)(nPrevBits & 0x00ffffff);
-    } else {
-        dDiff = ConvertBitsToDouble(nPrevBits);
-    }
-
-    if (nPrevHeight < 5465) {
-        // Early ages...
-        // 1111/((x+1)^2)
-        nSubsidyBase = (1111.0 / (pow((dDiff+1.0),2.0)));
-        if(nSubsidyBase > 500) nSubsidyBase = 500;
-        else if(nSubsidyBase < 1) nSubsidyBase = 1;
-    } else if (nPrevHeight < 17000 || (dDiff <= 75 && nPrevHeight < 24000)) {
-        // CPU mining era
-        // 11111/(((x+51)/6)^2)
-        nSubsidyBase = (11111.0 / (pow((dDiff+51.0)/6.0,2.0)));
-        if(nSubsidyBase > 500) nSubsidyBase = 500;
-        else if(nSubsidyBase < 25) nSubsidyBase = 25;
-    } else {
-        // GPU/ASIC mining era
-        // 2222222/(((x+2600)/9)^2)
-        nSubsidyBase = (2222222.0 / (pow((dDiff+2600.0)/9.0,2.0)));
-        if(nSubsidyBase > 25) nSubsidyBase = 25;
-        else if(nSubsidyBase < 5) nSubsidyBase = 5;
-    }
-
     // LogPrintf("height %u diff %4.2f reward %d\n", nPrevHeight, dDiff, nSubsidyBase);
-    CAmount nSubsidy = nSubsidyBase * COIN;
+    CAmount nSubsidy = consensusParams.nBaseReward * COIN;
 
-    // yearly decline of production by ~7.1% per year, projected ~18M coins max by year 2050+.
+    // yearly decline of production by ~9% per year, projected ~5B coins max by year 2070+.
     for (int i = consensusParams.nSubsidyHalvingInterval; i <= nPrevHeight; i += consensusParams.nSubsidyHalvingInterval) {
-        nSubsidy -= nSubsidy/14;
+        nSubsidy -= nSubsidy * 0.09;
     }
 
     // this is only active on devnets
@@ -1187,22 +1158,7 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
 
 CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
 {
-    CAmount ret = blockValue/5; // start at 20%
-
-    int nMNPIBlock = Params().GetConsensus().nMasternodePaymentsIncreaseBlock;
-    int nMNPIPeriod = Params().GetConsensus().nMasternodePaymentsIncreasePeriod;
-
-                                                                      // mainnet:
-    if(nHeight > nMNPIBlock)                  ret += blockValue / 20; // 158000 - 25.0% - 2014-10-24
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 1)) ret += blockValue / 20; // 175280 - 30.0% - 2014-11-25
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 2)) ret += blockValue / 20; // 192560 - 35.0% - 2014-12-26
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 3)) ret += blockValue / 40; // 209840 - 37.5% - 2015-01-26
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 4)) ret += blockValue / 40; // 227120 - 40.0% - 2015-02-27
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 5)) ret += blockValue / 40; // 244400 - 42.5% - 2015-03-30
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 6)) ret += blockValue / 40; // 261680 - 45.0% - 2015-05-01
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 7)) ret += blockValue / 40; // 278960 - 47.5% - 2015-06-01
-    if(nHeight > nMNPIBlock+(nMNPIPeriod* 9)) ret += blockValue / 40; // 313520 - 50.0% - 2015-08-03
-
+    CAmount ret = blockValue * 0.98;
     return ret;
 }
 
@@ -1802,7 +1758,7 @@ bool FindUndoPos(CValidationState &state, int nFile, CDiskBlockPos &pos, unsigne
 static CCheckQueue<CScriptCheck> scriptcheckqueue(128);
 
 void ThreadScriptCheck() {
-    RenameThread("dash-scriptch");
+    RenameThread("mbm-scriptch");
     scriptcheckqueue.Thread();
 }
 
@@ -1920,7 +1876,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     if (block.GetHash() == chainparams.GetConsensus().hashGenesisBlock) {
         if (!fJustCheck)
             view.SetBestBlock(pindex->GetBlockHash());
-        return true;
+        //return true; //Skip to spend genesis output as premine
     }
 
     bool fScriptChecks = true;
@@ -1964,9 +1920,7 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     // Now that the whole chain is irreversibly beyond that time it is applied to all blocks except the
     // two in the chain that violate it. This prevents exploiting the issue against nodes during their
     // initial block download.
-    bool fEnforceBIP30 = (!pindex->phashBlock) || // Enforce on CreateNewBlock invocations which don't have a hash.
-                          !((pindex->nHeight==91842 && pindex->GetBlockHash() == uint256S("0x00000000000a4d0a398161ffc163c503763b1f4360639393e0e4c8e300e0caec")) ||
-                           (pindex->nHeight==91880 && pindex->GetBlockHash() == uint256S("0x00000000000743f190a18c5577a3c2d2a1f610ae9601ac046a38084ccb7cd721")));
+    bool fEnforceBIP30 = (!pindex->phashBlock);
 
     // Once BIP34 activated it was not possible to create new duplicate coinbases and thus other than starting
     // with the 2 existing duplicate coinbase pairs, not possible to create overwriting txs.  But by the
@@ -1974,7 +1928,9 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
     // before the first had been spent.  Since those coinbases are sufficiently buried its no longer possible to create further
     // duplicate transactions descending from the known pairs either.
     // If we're on the known chain at height greater than where BIP34 activated, we can save the db accesses needed for the BIP30 check.
-    CBlockIndex *pindexBIP34height = pindex->pprev->GetAncestor(chainparams.GetConsensus().BIP34Height);
+    CBlockIndex *pindexBIP34height = NULL;
+    if (pindex->pprev)
+        pindexBIP34height = pindex->pprev->GetAncestor(chainparams.GetConsensus().BIP34Height);
     //Only continue to enforce if we're below BIP34 activation height or the block hash at that height doesn't correspond.
     fEnforceBIP30 = fEnforceBIP30 && (!pindexBIP34height || !(pindexBIP34height->GetBlockHash() == chainparams.GetConsensus().BIP34Hash));
 
@@ -2018,13 +1974,16 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
     // Start enforcing BIP68 (sequence locks) and BIP112 (CHECKSEQUENCEVERIFY) using versionbits logic.
     int nLockTimeFlags = 0;
-    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV, versionbitscache) == THRESHOLD_ACTIVE) {
-        flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
-        nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
-    }
+    if (pindex->pprev)
+    {
+        if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_CSV, versionbitscache) == THRESHOLD_ACTIVE) {
+            flags |= SCRIPT_VERIFY_CHECKSEQUENCEVERIFY;
+            nLockTimeFlags |= LOCKTIME_VERIFY_SEQUENCE;
+        }
 
-    if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_BIP147, versionbitscache) == THRESHOLD_ACTIVE) {
-        flags |= SCRIPT_VERIFY_NULLDUMMY;
+        if (VersionBitsState(pindex->pprev, chainparams.GetConsensus(), Consensus::DEPLOYMENT_BIP147, versionbitscache) == THRESHOLD_ACTIVE) {
+            flags |= SCRIPT_VERIFY_NULLDUMMY;
+        }
     }
 
     int64_t nTime2 = GetTimeMicros(); nTimeForks += nTime2 - nTime1;
@@ -2200,104 +2159,110 @@ static bool ConnectBlock(const CBlock& block, CValidationState& state, CBlockInd
 
     // DASH : CHECK TRANSACTIONS FOR INSTANTSEND
 
-    if (sporkManager.IsSporkActive(SPORK_3_INSTANTSEND_BLOCK_FILTERING)) {
-        // Require other nodes to comply, send them some data in case they are missing it.
-        for (const auto& tx : block.vtx) {
-            // skip txes that have no inputs
-            if (tx->vin.empty()) continue;
-            // LOOK FOR TRANSACTION LOCK IN OUR MAP OF OUTPOINTS
-            for (const auto& txin : tx->vin) {
-                uint256 hashLocked;
-                if (instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hashLocked != tx->GetHash()) {
+    if (block.GetHash() != chainparams.GenesisBlock().GetHash()) 
+    {
+        if (sporkManager.IsSporkActive(SPORK_3_INSTANTSEND_BLOCK_FILTERING)) {
+            // Require other nodes to comply, send them some data in case they are missing it.
+            for (const auto& tx : block.vtx) {
+                // skip txes that have no inputs
+                if (tx->vin.empty()) continue;
+                // LOOK FOR TRANSACTION LOCK IN OUR MAP OF OUTPOINTS
+                for (const auto& txin : tx->vin) {
+                    uint256 hashLocked;
+                    if (instantsend.GetLockedOutPointTxHash(txin.prevout, hashLocked) && hashLocked != tx->GetHash()) {
+                        // The node which relayed this should switch to correct chain.
+                        // TODO: relay instantsend data/proof.
+                        LOCK(cs_main);
+                        mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
+                        return state.DoS(10, error("ConnectBlock(DASH): transaction %s conflicts with transaction lock %s", tx->GetHash().ToString(), hashLocked.ToString()),
+                                        REJECT_INVALID, "conflict-tx-lock");
+                    }
+                }
+                llmq::CInstantSendLockPtr conflictLock = llmq::quorumInstantSendManager->GetConflictingLock(*tx);
+                if (!conflictLock) {
+                    continue;
+                }
+                if (llmq::chainLocksHandler->HasChainLock(pindex->nHeight, pindex->GetBlockHash())) {
+                    llmq::quorumInstantSendManager->RemoveChainLockConflictingLock(::SerializeHash(*conflictLock), *conflictLock);
+                    assert(llmq::quorumInstantSendManager->GetConflictingLock(*tx) == nullptr);
+                } else {
                     // The node which relayed this should switch to correct chain.
                     // TODO: relay instantsend data/proof.
                     LOCK(cs_main);
                     mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
-                    return state.DoS(10, error("ConnectBlock(DASH): transaction %s conflicts with transaction lock %s", tx->GetHash().ToString(), hashLocked.ToString()),
-                                     REJECT_INVALID, "conflict-tx-lock");
+                    return state.DoS(10, error("ConnectBlock(DASH): transaction %s conflicts with transaction lock %s", tx->GetHash().ToString(), conflictLock->txid.ToString()),
+                                    REJECT_INVALID, "conflict-tx-lock");
                 }
             }
-            llmq::CInstantSendLockPtr conflictLock = llmq::quorumInstantSendManager->GetConflictingLock(*tx);
-            if (!conflictLock) {
-                continue;
-            }
-            if (llmq::chainLocksHandler->HasChainLock(pindex->nHeight, pindex->GetBlockHash())) {
-                llmq::quorumInstantSendManager->RemoveChainLockConflictingLock(::SerializeHash(*conflictLock), *conflictLock);
-                assert(llmq::quorumInstantSendManager->GetConflictingLock(*tx) == nullptr);
-            } else {
-                // The node which relayed this should switch to correct chain.
-                // TODO: relay instantsend data/proof.
-                LOCK(cs_main);
-                mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
-                return state.DoS(10, error("ConnectBlock(DASH): transaction %s conflicts with transaction lock %s", tx->GetHash().ToString(), conflictLock->txid.ToString()),
-                                 REJECT_INVALID, "conflict-tx-lock");
-            }
+        } else {
+            LogPrintf("ConnectBlock(DASH): spork is off, skipping transaction locking checks\n");
         }
-    } else {
-        LogPrintf("ConnectBlock(DASH): spork is off, skipping transaction locking checks\n");
+
+        int64_t nTime5_1 = GetTimeMicros(); nTimeISFilter += nTime5_1 - nTime4;
+        LogPrint("bench", "      - IS filter: %.2fms [%.2fs]\n", 0.001 * (nTime5_1 - nTime4), nTimeISFilter * 0.000001);
+
+        // DASH : MODIFIED TO CHECK MASTERNODE PAYMENTS AND SUPERBLOCKS
+
+        // TODO: resync data (both ways?) and try to reprocess this block later.
+        CAmount blockReward = nFees + GetBlockSubsidy(pindex->pprev->nBits, pindex->pprev->nHeight, chainparams.GetConsensus());
+        std::string strError = "";
+
+        int64_t nTime5_2 = GetTimeMicros(); nTimeSubsidy += nTime5_2 - nTime5_1;
+        LogPrint("bench", "      - GetBlockSubsidy: %.2fms [%.2fs]\n", 0.001 * (nTime5_2 - nTime5_1), nTimeSubsidy * 0.000001);
+
+        if (!IsBlockValueValid(block, pindex->nHeight, blockReward, strError)) {
+            return state.DoS(0, error("ConnectBlock(DASH): %s", strError), REJECT_INVALID, "bad-cb-amount");
+        }
+
+        int64_t nTime5_3 = GetTimeMicros(); nTimeValueValid += nTime5_3 - nTime5_2;
+        LogPrint("bench", "      - IsBlockValueValid: %.2fms [%.2fs]\n", 0.001 * (nTime5_3 - nTime5_2), nTimeValueValid * 0.000001);
+
+        if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, blockReward)) {
+            mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
+            return state.DoS(0, error("ConnectBlock(DASH): couldn't find masternode or superblock payments"),
+                                    REJECT_INVALID, "bad-cb-payee");
+        }
+
+        int64_t nTime5_4 = GetTimeMicros(); nTimePayeeValid += nTime5_4 - nTime5_3;
+        LogPrint("bench", "      - IsBlockPayeeValid: %.2fms [%.2fs]\n", 0.001 * (nTime5_4 - nTime5_3), nTimePayeeValid * 0.000001);
+
+        if (!ProcessSpecialTxsInBlock(block, pindex, state, fJustCheck, fScriptChecks)) {
+            return error("ConnectBlock(DASH): ProcessSpecialTxsInBlock for block %s failed with %s",
+                        pindex->GetBlockHash().ToString(), FormatStateMessage(state));
+        }
+
+        int64_t nTime5_5 = GetTimeMicros(); nTimeProcessSpecial += nTime5_5 - nTime5_4;
+        LogPrint("bench", "      - ProcessSpecialTxsInBlock: %.2fms [%.2fs]\n", 0.001 * (nTime5_5 - nTime5_4), nTimeProcessSpecial * 0.000001);
+
     }
-
-    int64_t nTime5_1 = GetTimeMicros(); nTimeISFilter += nTime5_1 - nTime4;
-    LogPrint("bench", "      - IS filter: %.2fms [%.2fs]\n", 0.001 * (nTime5_1 - nTime4), nTimeISFilter * 0.000001);
-
-    // DASH : MODIFIED TO CHECK MASTERNODE PAYMENTS AND SUPERBLOCKS
-
-    // TODO: resync data (both ways?) and try to reprocess this block later.
-    CAmount blockReward = nFees + GetBlockSubsidy(pindex->pprev->nBits, pindex->pprev->nHeight, chainparams.GetConsensus());
-    std::string strError = "";
-
-    int64_t nTime5_2 = GetTimeMicros(); nTimeSubsidy += nTime5_2 - nTime5_1;
-    LogPrint("bench", "      - GetBlockSubsidy: %.2fms [%.2fs]\n", 0.001 * (nTime5_2 - nTime5_1), nTimeSubsidy * 0.000001);
-
-    if (!IsBlockValueValid(block, pindex->nHeight, blockReward, strError)) {
-        return state.DoS(0, error("ConnectBlock(DASH): %s", strError), REJECT_INVALID, "bad-cb-amount");
-    }
-
-    int64_t nTime5_3 = GetTimeMicros(); nTimeValueValid += nTime5_3 - nTime5_2;
-    LogPrint("bench", "      - IsBlockValueValid: %.2fms [%.2fs]\n", 0.001 * (nTime5_3 - nTime5_2), nTimeValueValid * 0.000001);
-
-    if (!IsBlockPayeeValid(*block.vtx[0], pindex->nHeight, blockReward)) {
-        mapRejectedBlocks.insert(std::make_pair(block.GetHash(), GetTime()));
-        return state.DoS(0, error("ConnectBlock(DASH): couldn't find masternode or superblock payments"),
-                                REJECT_INVALID, "bad-cb-payee");
-    }
-
-    int64_t nTime5_4 = GetTimeMicros(); nTimePayeeValid += nTime5_4 - nTime5_3;
-    LogPrint("bench", "      - IsBlockPayeeValid: %.2fms [%.2fs]\n", 0.001 * (nTime5_4 - nTime5_3), nTimePayeeValid * 0.000001);
-
-    if (!ProcessSpecialTxsInBlock(block, pindex, state, fJustCheck, fScriptChecks)) {
-        return error("ConnectBlock(DASH): ProcessSpecialTxsInBlock for block %s failed with %s",
-                     pindex->GetBlockHash().ToString(), FormatStateMessage(state));
-    }
-
-    int64_t nTime5_5 = GetTimeMicros(); nTimeProcessSpecial += nTime5_5 - nTime5_4;
-    LogPrint("bench", "      - ProcessSpecialTxsInBlock: %.2fms [%.2fs]\n", 0.001 * (nTime5_5 - nTime5_4), nTimeProcessSpecial * 0.000001);
 
     int64_t nTime5 = GetTimeMicros(); nTimeDashSpecific += nTime5 - nTime4;
     LogPrint("bench", "    - Dash specific: %.2fms [%.2fs]\n", 0.001 * (nTime5 - nTime4), nTimeDashSpecific * 0.000001);
-
     // END DASH
 
     if (fJustCheck)
         return true;
 
     // Write undo information to disk
-    if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS))
+    if (block.GetHash() != chainparams.GetConsensus().hashGenesisBlock) 
     {
-        if (pindex->GetUndoPos().IsNull()) {
-            CDiskBlockPos _pos;
-            if (!FindUndoPos(state, pindex->nFile, _pos, ::GetSerializeSize(blockundo, SER_DISK, CLIENT_VERSION) + 40))
-                return error("ConnectBlock(): FindUndoPos failed");
-            if (!UndoWriteToDisk(blockundo, _pos, pindex->pprev->GetBlockHash(), chainparams.MessageStart()))
-                return AbortNode(state, "Failed to write undo data");
+        if (pindex->GetUndoPos().IsNull() || !pindex->IsValid(BLOCK_VALID_SCRIPTS))
+        {
+            if (pindex->GetUndoPos().IsNull()) {
+                CDiskBlockPos _pos;
+                if (!FindUndoPos(state, pindex->nFile, _pos, ::GetSerializeSize(blockundo, SER_DISK, CLIENT_VERSION) + 40))
+                    return error("ConnectBlock(): FindUndoPos failed");
+                if (!UndoWriteToDisk(blockundo, _pos, pindex->pprev->GetBlockHash(), chainparams.MessageStart()))
+                    return AbortNode(state, "Failed to write undo data");
 
-            // update nUndoPos in block index
-            pindex->nUndoPos = _pos.nPos;
-            pindex->nStatus |= BLOCK_HAVE_UNDO;
+                // update nUndoPos in block index
+                pindex->nUndoPos = _pos.nPos;
+                pindex->nStatus |= BLOCK_HAVE_UNDO;
+            }
+
+            pindex->RaiseValidity(BLOCK_VALID_SCRIPTS);
+            setDirtyBlockIndex.insert(pindex);
         }
-
-        pindex->RaiseValidity(BLOCK_VALID_SCRIPTS);
-        setDirtyBlockIndex.insert(pindex);
     }
 
     if (fTxIndex)
