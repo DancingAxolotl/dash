@@ -7,9 +7,9 @@ User=dashcore
 Group=dashcore
 
 Type=forking
-PIDFile=/var/lib/dashd/dashd.pid
-ExecStart=/usr/bin/dashd -daemon -pid=/var/lib/dashd/dashd.pid \
--conf=/etc/dashcore/dash.conf -datadir=/var/lib/dashd -disablewallet
+PIDFile=/var/lib/mbmd/mbmd.pid
+ExecStart=/usr/bin/mbmd -daemon -pid=/var/lib/mbmd/mbmd.pid \
+-conf=/etc/dashcore/dash.conf -datadir=/var/lib/mbmd -disablewallet
 
 Restart=always
 PrivateTmp=true

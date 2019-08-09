@@ -200,7 +200,7 @@ int main(int argc, char* argv[])
 
     SetupEnvironment();
 
-    // Connect dashd signal handlers
+    // Connect mbmd signal handlers
     noui_connect();
 
     return (AppInit(argc, argv) ? EXIT_SUCCESS : EXIT_FAILURE);
