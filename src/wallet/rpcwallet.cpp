@@ -3004,7 +3004,7 @@ UniValue makekeypair(const JSONRPCRequest& request)
     CKey secret;
     secret.MakeNewKey(true);
 
-    UniValue result(UniValue::VARR);
+    UniValue result(UniValue::VOBJ);
     result.push_back(Pair("public", CBitcoinAddress(secret.GetPubKey().GetID()).ToString()));
     result.push_back(Pair("private", CBitcoinSecret(secret).ToString()));
 
