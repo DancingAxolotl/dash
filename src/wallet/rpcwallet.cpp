@@ -2999,6 +2999,18 @@ UniValue setbip69enabled(const JSONRPCRequest& request)
     return NullUniValue;
 }
 
+UniValue makekeypair(const JSONRPCRequest& request)
+{
+    CKey secret;
+    secret.MakeNewKey(true);
+
+    UniValue result(UniValue::VARR);
+    result.push_back(Pair("public", CBitcoinAddress(secret.GetPubKey().GetID()).ToString()));
+    result.push_back(Pair("private", CBitcoinSecret(secret).ToString()));
+
+    return result;
+}
+
 extern UniValue dumpprivkey(const JSONRPCRequest& request); // in rpcdump.cpp
 extern UniValue importprivkey(const JSONRPCRequest& request);
 extern UniValue importaddress(const JSONRPCRequest& request);
@@ -3071,6 +3083,7 @@ static const CRPCCommand commands[] =
     { "wallet",             "importelectrumwallet",     &importelectrumwallet,     true,   {"filename", "index"} },
 
     { "hidden",             "setbip69enabled",          &setbip69enabled,          true,   {} },
+    { "hidden",             "makekeypair",              &makekeypair,              false,  {} },
 };
 
 void RegisterWalletRPCCommands(CRPCTable &t)
